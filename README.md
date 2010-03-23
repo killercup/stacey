@@ -8,11 +8,11 @@ If you look in the `/content` and `/templates` folders, you should get the gener
 
 ## Installation
 
-Copy to server, `chmod 777 app/_cache`, rename `htacess` file to `.htaccess`.
+Copy to server, `chmod 777 app/_cache`, rename `htaccess` file to `.htaccess`.
 
 ## Read More
 
-See [StaceyApp.com](http://staceyapp.com) for more detailed usage information.
+See <http://staceyapp.com> for more detailed usage information.
 
 ## Copyright/License
 
