@@ -114,6 +114,19 @@ Class TemplateParser {
 		# run the replacements on the pre-"foreach" part of the partial
 		$template = self::parse($data, $template_parts[1]);
 		
+		# new: allow limitation syntax
+		# e.g. $children[:5] to only get first 5 children
+		preg_match('/([\$\@a-z0-9_].+?)([\[\]\:\d]+?|)$/', $template_parts[2], $limit);
+		# if there is a limit set in the template
+		if($limit[2]) {
+			preg_match('/\[\:([\d]+?)\]/', $limit[2], $limit[2]);
+			# so here is the limit of things to get:
+			$slice = $limit[2][1];
+		}
+		
+		# i'm lazy. i won't break anything i have to fix afterwards.
+		$template_parts[2] = $limit[1];
+		
 		# traverse one level deeper into the data hierachy
 		$pages = (isset($data[$template_parts[2]]) && is_array($data[$template_parts[2]]) && !empty($data[$template_parts[2]])) ? $data[$template_parts[2]] : false;
 		
@@ -121,6 +134,11 @@ Class TemplateParser {
 	  $template_parts = self::test_nested_matches($template_parts, 'foreach[\s]+?[\$\@].+?\s+?do\s+?', 'endforeach');
 		
 		if($pages) {
+			
+			# slice the array according to set limit
+			if($slice) {
+				$pages = array_slice($pages, 0, $slice);
+			}
 		  
 			foreach($pages as $data_item) {
 				# transform data_item into its appropriate Object
