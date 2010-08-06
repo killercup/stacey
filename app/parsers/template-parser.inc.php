@@ -121,15 +121,33 @@ Class TemplateParser {
     preg_match('/([\S\s]*?)foreach[\s]+?([\$\@].+?)\s+?do\s+?([\S\s]+?)endforeach([\S\s]*)$/', $template, $template_parts);
     # run the replacements on the pre-"foreach" part of the partial
     $template = self::parse($data, $template_parts[1]);
-    
+
+    # new: allow limitation syntax
+    # e.g. $children[:5] to only get first 5 children
+    preg_match('/([\$\@a-z0-9_].+?)([\[\]\:\d]+?|)$/', $template_parts[2], $limit);
+    # if there is a limit set in the template
+    if($limit[2]) {
+      preg_match('/\[\:([\d]+?)\]/', $limit[2], $limit[2]);
+      # so here is the limit of things to get:
+      $slice = $limit[2][1];
+    }
+
+    # i'm lazy. i won't break anything i have to fix afterwards.
+    $template_parts[2] = $limit[1];
+
     # traverse one level deeper into the data hierachy
     $pages = (isset($data[$template_parts[2]]) && is_array($data[$template_parts[2]]) && !empty($data[$template_parts[2]])) ? $data[$template_parts[2]] : false;
-    
+
     # check for any nested matches
     $template_parts = self::test_nested_matches($template_parts, 'foreach[\s]+?[\$\@].+?\s+?do\s+?', 'endforeach');
-    
+
     if($pages) {
-      
+
+      # slice the array according to set limit
+      if($slice) {
+        $pages = array_slice($pages, 0, $slice);
+      }
+
       foreach($pages as $data_item) {
         # transform data_item into its appropriate Object
         $data_object =& AssetFactory::get($data_item);
@@ -137,12 +155,12 @@ Class TemplateParser {
         $template .= self::parse($data_object, $template_parts[3]);
       }
     }
-    
+
     # run the replacements on the post-"foreach" part of the partial
     $template .= self::parse($data, $template_parts[4]);
     return $template;
   }
-  
+
   static function parse_if($data, $template) {
     # match any inner if statements
     preg_match('/([\S\s]*?)if\s*?(!)?\s*?([\$\@].+?)\s+?do\s+?([\S\s]+?)endif([\S\s]*)$/', $template, $template_parts);
