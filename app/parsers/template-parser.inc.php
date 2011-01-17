@@ -125,7 +125,6 @@ Class TemplateParser {
     # run the replacements on the pre-"foreach" part of the partial
     $template = self::parse($data, $template_parts[1]);
 
-<<<<<<< HEAD
     # new: allow limitation syntax
     # e.g. $children[:5] to only get first 5 children
     preg_match('/([\$\@a-z0-9_].+?)([\[\]\:\d]+?|)$/', $template_parts[2], $limit);
@@ -134,6 +133,8 @@ Class TemplateParser {
       preg_match('/\[\:([\d]+?)\]/', $limit[2], $limit[2]);
       # so here is the limit of things to get:
       $slice = $limit[2][1];
+    } else {
+      $slice = false;
     }
 
     # i'm lazy. i won't break anything i have to fix afterwards.
@@ -219,14 +220,10 @@ Class TemplateParser {
       $var = ($key == '@root_path') ? $key.'\/?' : $key;
       if(is_string($value) && strlen($var) > 1) $template = preg_replace('/'.$var.'/', $value, $template);
     }
-<<<<<<< HEAD
-    
-=======
 
     # temporarily replace any remaining @ symbols to prevent variables being replaced in an incorrect scope
     $template = str_replace('@', "\x01", $template);
 
->>>>>>> kolber/master
     return $template;
   }
 
